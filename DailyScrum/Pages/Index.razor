@@ -1,0 +1,70 @@
+﻿@page "/"
+@inject IRepository<Project> _projectRepository
+@inject IRepository<Sprint> _sprintRepository
+<style>
+    .main {
+        background-image: url(https://www.avepoint.com/blog/wp-content/uploads/2018/11/female-manager-stands-addressing-team-at-board-meeting-picture-id904596172.jpg);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .welcomem-div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .w3-card-4 {
+        margin: 20px;
+        min-width: 350px;
+    }
+
+    .w3-container{
+        min-height: 200px;
+    }
+    h3 {
+        text-align: center;
+        vertical-align: middle;
+        line-height: 200px;
+    }
+</style>
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<h1 class="welcome-text">  Welcome to Daily Scrum</h1>
+
+<div class="welcomem-div">
+
+    <div class="w3-container">
+        <h2>Statystyki</h2>
+
+        <div class="w3-card-4" style="width:70%">
+            <header class="w3-container w3-light-grey">
+                <h3>Ilość projektów: @projects.Count</h3>
+            </header>
+
+            <button class="w3-button w3-block w3-dark-grey">> Projekty</button>
+        </div>
+
+        <div class="w3-card-4" style="width:70%">
+            <header class="w3-container w3-light-grey">
+                <h3>Ilość sprintów: @sprints.Count</h3>
+            </header>
+
+            <button class="w3-button w3-block w3-dark-grey">> Sprinty</button>
+        </div>
+    </div>
+</div>
+
+
+@code{
+    public List<Project> projects;
+    public List<Sprint> sprints;
+    string dupa;
+    protected override void OnInitialized()
+    {
+        projects = _projectRepository.GetAll().ToList();
+        sprints = _sprintRepository.GetAll().ToList();
+    }
+}

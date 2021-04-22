@@ -1,0 +1,32 @@
+﻿@inject IRepository<Sprint> _sprintRepository
+@inject SettingsService SettingsService
+@*<h3>Create new sprint</h3>*@
+<div class="form-group">
+    <label>Name</label>
+    <input class="form-control" type="text" @bind="sprint.Name" />
+</div>
+<div class="form-group">
+    <label>Description</label>
+    <input class="form-control" type="text" @bind="sprint.Description" />
+</div>
+<div class="form-group">
+    <label>Start date</label>
+    <input class="form-control" type="date" @bind="sprint.StartDate" />
+</div>
+<div class="form-group">
+    <label>End date</label>
+    <input class="form-control" type="date" @bind="sprint.EndDate" />
+</div>
+
+<button @onclick="SubmitNewSprint" class="btn btn-primary">Submit</button>
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    Sprint sprint = new Sprint();
+    void SubmitNewSprint()
+    {
+        sprint.ProjectId = new Guid(SettingsService.GetValue(SettingKeys.CurrentProjectId));
+        if (sprint.Name != null)
+            _sprintRepository.Create(sprint);
+        BlazoredModal.Close();
+    }
+}

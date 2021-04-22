@@ -1,0 +1,59 @@
+﻿<div class="trello-status">
+    <h3><center>@ListStatus</center></h3>
+    <ul class="dropzone @dropClass"
+        ondragover="event.preventDefault();"
+        ondragstart="event.dataTransfer.setData('', event.target.id);"
+        @ondrop="HandleDrop"
+        @ondragenter="HandleDragEnter"
+        @ondragleave="HandleDragLeave">
+
+        @foreach (var issue in Issues)
+        {
+        <div class="module">
+            <IssueElement DraggedIssue="issue" />
+        </div>
+        }
+
+    </ul>
+</div>
+
+
+@code {
+    [CascadingParameter] IssueContainer Container { get; set; }
+    [Parameter] public Status ListStatus { get; set; }
+    [Parameter] public Status[] AllowedStatuses { get; set; }
+
+    List<Issue> Issues = new List<Issue>();
+    string dropClass = "";
+
+    protected override void OnParametersSet()
+    {
+        Issues.Clear();
+        Issues.AddRange(Container.Issues.Where(x => x.Status == ListStatus));
+    }
+
+    private void HandleDragEnter()
+    {
+        if (ListStatus == Container.Payload.Status) return;
+        if (AllowedStatuses != null && !AllowedStatuses.Contains(Container.Payload.Status))
+        {
+            dropClass = "no-drop";
+        }
+        else
+        {
+            dropClass = "can-drop";
+        }
+    }
+
+    private void HandleDragLeave()
+    {
+        dropClass = "";
+    }
+    private async Task HandleDrop()
+    {
+        dropClass = "";
+        if (AllowedStatuses != null && AllowedStatuses.Contains(Container.Payload.Status)) return;
+        await Container.UpdateIssueAsync(ListStatus);
+    }
+}
+

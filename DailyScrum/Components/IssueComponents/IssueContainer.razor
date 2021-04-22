@@ -1,0 +1,25 @@
+﻿@inject IRepository<Issue> _issuesRepository
+
+
+<div class="trello-container">
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter] public List<Issue> Issues { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback<Issue> OnStatusUpdated { get; set; }
+    public Issue Payload { get; set; }
+    public async Task UpdateIssueAsync(Status newStatus)
+    {
+        var issue = Issues.SingleOrDefault(x => x.Id == Payload.Id);
+        if (issue !=null)
+        {
+            issue.Status = newStatus;
+            _issuesRepository.Edit(issue);
+            await OnStatusUpdated.InvokeAsync(Payload);
+        }
+    }
+}

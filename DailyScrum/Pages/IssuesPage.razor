@@ -1,0 +1,57 @@
+﻿@page "/issuespage"
+@inject IRepository<Issue> _issuesRepository
+@inject IRepository<Project> _projectsRepository
+@inject IRepository<Sprint> _sprintRepository
+@inject SettingsService SettingsService
+
+    <div class="sprint-info">
+        <h3>
+            Selected sprint: @ActiveSprint.Name <br />
+            Started at:<span style="color:green"> @ActiveSprint.StartDate.ToShortDateString()</span> <br/>
+            Ends at:<span style="color:red"> @ActiveSprint.EndDate.Date.ToShortDateString()</span> <br />
+</h3>
+
+    </div>
+    <IssueContainer Issues="Issues" OnStatusUpdated="HandleStatusUpdated">
+        <IssueList ListStatus="Status.ToDo" AllowedStatuses="@(new Status[] { Status.ToDo })" />
+        <IssueList ListStatus="Status.InProgress" AllowedStatuses="@(new Status[] { Status.InProgress })" />
+        @*<IssueList ListStatus="Status.Verify" AllowedStatuses="@(new Status[] { Status.Verify })" />*@
+        <IssueList ListStatus="Status.Done" AllowedStatuses="@(new Status[] { Status.Done })" />
+    </IssueContainer>
+
+
+    <hr />
+    <p>Last updated Issue was: <strong>@lastUpdatedIssue</strong></p>
+    <hr />
+
+    @*@foreach (var i in Issues)
+        {
+            <p>@i.Title</p>
+        }*@
+
+
+
+    @code {
+
+        public List<Issue> Issues;
+        private Guid ActiveProjectId;
+        private Guid ActiveSprintId;
+        private Sprint ActiveSprint;
+        string lastUpdatedIssue = "";
+        protected override void OnInitialized()
+        {
+            ActiveProjectId = new Guid(SettingsService.GetValue(SettingKeys.CurrentProjectId));
+            ActiveSprintId = new Guid(SettingsService.GetValue(SettingKeys.CurrentSprintId));
+            ActiveSprint = _sprintRepository.GetAll().Where(x => x.Id == ActiveSprintId).FirstOrDefault();
+            Issues = _issuesRepository.GetAll().Where(x => x.ProjectId == ActiveProjectId && x.SprintId == ActiveSprintId).ToList();
+
+        }
+
+
+
+
+        void HandleStatusUpdated(Issue updatedIssue)
+        {
+            lastUpdatedIssue = updatedIssue.Title;
+        }
+    }

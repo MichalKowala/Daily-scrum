@@ -1,0 +1,31 @@
+﻿@inject IRepository<Issue> _issuesRepository
+    <div class="issues-container">
+        <CascadingValue Value="this">
+            @ChildContent
+        </CascadingValue>
+    </div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public List<Issue> Issues { get; set; }
+    [Parameter] public EventCallback<Issue> OnStatusUpdated { get; set; }
+    public Issue Payload { get; set; }
+    public async Task UpdateIssueAsync(Guid newSprintId)
+    {
+        var issue = Issues.SingleOrDefault(x => x.Id == Payload.Id);
+        if (issue !=null)
+        {
+            if(newSprintId == Guid.Empty)
+            {
+                issue.SprintId = null;
+            }
+            else
+            {
+                issue.SprintId = newSprintId;
+            }
+            _issuesRepository.Edit(issue);
+            await OnStatusUpdated.InvokeAsync(Payload);
+        }
+
+    }
+}

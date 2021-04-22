@@ -1,0 +1,38 @@
+﻿@page "/backlogpage"
+@inject IRepository<Issue> _issueRepository
+@inject IRepository<Sprint> _sprintRepository
+@inject IModalService Modal
+@inject SettingsService SettingsService
+
+<BacklogContainer Issues="Issues" OnStatusUpdated="HandleSprintIdUpdated">
+    @foreach (Sprint sprint in Sprints)
+    {
+        <BacklogList ListSprintId="sprint.Id" />
+    }
+    <BacklogList ListSprintId=Guid.Empty />
+</BacklogContainer>
+
+<button @onclick="@(() => Modal.Show<AddSprintModal>("Create new sprint"))" class="btn btn-primary">Create sprint</button>
+
+
+<hr />
+<p>Last updated Issue was: <strong>@lastUpdatedIssue</strong></p>
+<hr />
+
+@code {
+    public string lastUpdatedIssue = "";
+    public List<Issue> Issues;
+    public List<Sprint> Sprints;
+    private Guid ActiveProjectId;
+    protected override void OnInitialized()
+    {
+        ActiveProjectId = new Guid(SettingsService.GetValue(SettingKeys.CurrentProjectId));
+        Issues = _issueRepository.GetAll().Where(x => x.ProjectId == ActiveProjectId && x.Status!=Status.Done).ToList();
+        Sprints = _sprintRepository.GetAll().Where(x => x.ProjectId == ActiveProjectId).ToList();
+    }
+   
+    void HandleSprintIdUpdated(Issue updatedIssue)
+    {
+        lastUpdatedIssue = updatedIssue.Title;
+    }
+}

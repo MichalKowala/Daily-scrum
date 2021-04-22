@@ -1,0 +1,80 @@
+﻿@inject IRepository<Sprint> _sprintRepository
+@inject IModalService Modal
+
+    <div class="issue-status">
+        @*<h3>@sprint.Name (@Issues.Count())</h3>*@
+          <h3>@sprintName</h3>
+        <ul class="dropzone @dropClass"
+            ondragover="event.preventDefault();"
+            ondragstart="event.dataTransfer.setData('', event.target.id);"
+            @ondrop="HandleDrop"
+            @ondragenter="HandleDragEnter"
+            @ondragleave="HandleDragLeave">
+
+            @foreach (var issue in Issues)
+            {
+                <BacklogElement DraggedIssue="issue" />
+            }
+
+        </ul>
+        @if (sprintName != "Backlog")
+        {
+        <div class="button-group">
+            <button @onclick="EditSprint" class="btn btn-primary">Edit</button><br />
+            <button @onclick="DeleteSprint" class="btn btn-primary">Delete</button>
+        </div>
+        }
+    </div>
+@code {
+        [CascadingParameter] BacklogContainer Container { get; set; }
+        [Parameter] public Guid ListSprintId { get; set; }
+        List<Issue> Issues = new List<Issue>();
+        string dropClass = "";
+    private string sprintName { get; set; }
+    protected override void OnParametersSet()
+    {
+       
+        Issues.Clear();
+
+        if(ListSprintId == Guid.Empty)
+        {
+            sprintName = "Backlog";
+            Issues.AddRange(Container.Issues.Where(x => x.SprintId == null));
+        }
+        else
+        {
+            sprintName = _sprintRepository.GetById(ListSprintId).Name;
+            Issues.AddRange(Container.Issues.Where(x => x.SprintId == ListSprintId));
+        }
+
+    }
+    private void HandleDragEnter()
+    {
+        if (ListSprintId == Container.Payload.SprintId) return;
+        dropClass = "can-drop";
+    }
+    private void HandleDragLeave()
+    {
+        dropClass = "";
+    }
+    private async Task HandleDrop()
+    {
+        dropClass = "";
+        await Container.UpdateIssueAsync(ListSprintId);
+    }
+    private void EditSprint()
+    {
+        var modalParams = new ModalParameters();
+        modalParams.Add(nameof(EditSprintModal.SprintId),ListSprintId);
+        Modal.Show<EditSprintModal>("Edit sprint", modalParams);
+    }
+    private void DeleteSprint()
+    {
+        var modalParams = new ModalParameters();
+        modalParams.Add(nameof(DeleteSprintModal.SprintToRemoveId), ListSprintId);
+        Modal.Show<DeleteSprintModal>("Delete sprint", modalParams);
+        
+        StateHasChanged();
+    }
+
+}

@@ -1,0 +1,39 @@
+﻿@inject IRepository<Issue> _issueRepository
+@inject SettingsService SettingsService
+<h2>Create issue</h2>
+<div class="form-group">
+    <label>Title</label>
+    <input class="form-control" type="text" @bind="Issue.Title" />
+</div>
+<div class="form-group">
+    <label>Description</label>
+    <input class="form-control" type="text" @bind="Issue.Description" />
+</div>
+<div class="form-group">
+    <label>Label</label>
+    <input class="form-control" type="text" @bind="Issue.Label" />
+</div>
+<div class="form-group">
+    <label>Priority</label>
+    <input class="form-control" type="text" @bind="Issue.Priority" />
+</div>
+<div class="form-group">
+    <label>Type</label>
+    <input class="form-control" type="text" @bind="Issue.Type" />
+</div>
+
+   <button class="btn btn-primary" @onclick="Create">Submit</button>
+    @code {
+        [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+        Issue Issue = new Issue();
+        private void Create()
+        {
+            Issue.ProjectId = new Guid(SettingsService.GetValue(SettingKeys.CurrentProjectId));
+            _issueRepository.Create(Issue);
+            BlazoredModal.Close();
+        }
+        protected override void OnInitialized()
+        {
+
+        }
+    }

@@ -1,0 +1,12 @@
+﻿<li class="backlog-draggable" draggable="true" title="@DraggedIssue.Title" @ondragstart="@(() => HandleDragStart(DraggedIssue))">
+    <p class="title">@DraggedIssue.Title</p>
+</li>
+
+@code {
+    [CascadingParameter] BacklogContainer Container { get; set; }
+    [Parameter] public Issue DraggedIssue { get; set; }
+    private void HandleDragStart(Issue selectedIssue)
+    {
+        Container.Payload = selectedIssue;
+    }
+}

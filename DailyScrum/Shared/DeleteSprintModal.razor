@@ -1,0 +1,42 @@
+﻿@inject IRepository<Sprint> _sprintRepository
+@inject IRepository<Issue> _issueRepository
+@inject IModalService Modal
+    <div class="delete-modal">
+        Are you sure you want to delete this sprint? <br />
+
+        <button class="btn btn-primary" @onclick="@Confirm">Yes</button>
+        <button class="btn btn-primary" @onclick="@Reject">Cancel</button>
+    </div>
+
+    @code {
+        [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+        [Parameter] public Guid SprintToRemoveId { get; set; }
+        Sprint SprintToRemove { get; set; }
+        List<Issue> CorrespondingIssues { get; set; }
+
+        protected override void OnInitialized()
+        {
+            SprintToRemove = _sprintRepository.GetById(SprintToRemoveId);
+            CorrespondingIssues = _issueRepository.GetAll().Where(x => x.SprintId == SprintToRemove.Id).ToList();
+
+        }
+
+        async Task Confirm()
+        {
+            if (CorrespondingIssues.Any(x => x.Status != Status.Done))
+            {
+                var modalParams = new ModalParameters();
+                modalParams.Add(nameof(IssuesDestinationModal.Issues), CorrespondingIssues);
+                var confirmationModal = Modal.Show<IssuesDestinationModal>("Unfinished issues", modalParams);
+                await confirmationModal.Result;
+                // _sprintRepository.Delete(SprintToRemove);
+            }
+            _sprintRepository.Delete(SprintToRemove);
+            BlazoredModal.Close(ModalResult.Ok(true));
+
+        }
+        void Reject()
+        {
+            BlazoredModal.Cancel();
+        }
+    }

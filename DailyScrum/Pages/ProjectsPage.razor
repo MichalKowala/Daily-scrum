@@ -1,0 +1,36 @@
+﻿@page "/projectspage"
+@inject IRepository<Project> _projectsRepository
+    <div class="container-fluid">
+        <div class="form-group">
+            <label>Create new project</label>
+            <input class="form-control" type="text" @bind="Project.Name" />
+        </div>
+        <button class="btn btn-primary" @onclick="Create">Create</button>
+        <div class="form-group">
+            <RadzenDropDown AllowClear="true" TValue="Guid"
+                            Data="@(projects.Select(p => new { Id = p.Id, Name = p.Name }).Distinct())"
+                            TextProperty="Name" ValueProperty="Id" Style="margin-top: 20px; width:650px;" Placeholder="Select Project To Delete" Change="@(args => DeleteProject(args, "ASD"))" />
+        </div>
+        <button class="btn btn-primary">Delete project</button>
+
+    </div>
+
+
+@code {
+
+    Project Project = new Project();
+    List<Project> projects;
+    protected override void OnInitialized()
+    {
+        projects = _projectsRepository.GetAll().ToList();
+    }
+    private void Create()
+    {
+        _projectsRepository.Create(Project);
+    }
+    private void DeleteProject(object value, string name)
+    {
+       
+    }
+
+}

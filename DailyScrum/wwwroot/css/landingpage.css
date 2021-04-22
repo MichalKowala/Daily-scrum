@@ -1,0 +1,8 @@
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+.landing-body {
+    background-image: url(https://www.agileconnection.com/sites/default/files/article/2015/scrum-standup-meeting.jpg);
+    
+    height: 100%;
+    width: 100%;
+}

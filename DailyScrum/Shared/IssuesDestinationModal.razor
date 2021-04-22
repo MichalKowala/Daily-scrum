@@ -1,0 +1,43 @@
+﻿@inject IRepository<Issue> _issueRepository
+
+This sprint has @unfinishedIssues.Count unfinished isssue(s) attached to it <br /> <br />
+<button @onclick="DeleteAttached" class="btn btn-primary">Delete with sprint</button>
+<button @onclick="MoveAttached" class="btn btn-primary">Move to backlog</button>
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public List<Issue> Issues { get; set; }
+    List<Issue> unfinishedIssues { get; set; }
+
+    protected override void OnInitialized()
+    {
+        unfinishedIssues = Issues.Where(x => x.Status != Status.Done).ToList();
+
+    }
+    void DeleteAttached()
+    {
+        foreach (Issue i in Issues)
+        {
+            _issueRepository.Delete(i);
+        }
+        BlazoredModal.Close(ModalResult.Ok(true));
+    }
+    void MoveAttached()
+    {
+        foreach (Issue i in Issues)
+        {
+            if (i.Status != Status.Done)
+            {
+                i.SprintId = null;
+                _issueRepository.Edit(i);
+            }
+            else
+            {
+                _issueRepository.Delete(i);
+            }
+
+        }
+        BlazoredModal.Close(ModalResult.Ok(true));
+    }
+
+}
+
